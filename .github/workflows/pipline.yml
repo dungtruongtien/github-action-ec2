@@ -1,0 +1,61 @@
+name: GITHUB ACTION WORKFLOW
+
+env:
+  MY_APPLICATION_NAME: "GithubActionEC2"
+  MY_ENVIRONMENT_NAME: "Production"
+  DEPLOY_PACKAGE_NAME: "github_action_ec2_${{ github.sha }}.zip"
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  my_testing:
+    runs-on: ubuntu-latest
+    env:
+      VAR_1: "Variablel on Job level"
+      VAR_2: "Variable2 on Job level"
+    steps:
+    - name: Git clone our repo
+      uses: actions/checkout@v1
+
+    - name: Execute one command
+      run : echo Hello, world!
+
+    - name: Execute few commands
+      run : |
+        echo "Hello World."
+        echo "We are going to deploy my repo to remote AWS Server. "
+        echo "Its not so hard as you think."
+        echo "Let's see what do we have here in current folder...."
+        echo "Hello: $F_NAME $L_NAME this is local Environment variables to this step."
+      env:
+            F_NAME: "Denis"
+            L_NAME: "Astahov"
+            
+    - name: List current folder
+      run : ls -la
+
+    - name: Print value of Global Environment Variable 
+      run : echo ${{ env.DEPLOY_PACKAGE_NAME }}
+
+    - name: Print value of JOB Level Environment Variable 
+      run : echo ${{ env.VAR_2 }}
+
+    - name: Test aws cli installation
+      run : aws --version
+
+  my_deploy:
+    runs-on: ubuntu-latest
+    needs: [my_testing]
+
+    steps:
+    - name: Git clone our repo
+      uses: actions/checkout@v1
+
+    - name: Print value of Global Environmetn Variables
+      run : |
+        echo "Will deploy package: ${{ env.DEPLOY_PACKAGE_NAME }}"
+        echo "Application name: ${{ env.MY_APPLICATION_NAME }}"
+        echo "Environment name: ${{ env.MY_ENVIRONMENT_NAME }}"
